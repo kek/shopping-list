@@ -1,39 +1,37 @@
 defmodule ShoppingListWeb.PageLive do
   use ShoppingListWeb, :live_view
+  require Logger
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, query: "", results: %{})}
+    {:ok, assign(socket, items: items())}
   end
 
   @impl true
-  def handle_event("suggest", %{"q" => query}, socket) do
-    {:noreply, assign(socket, results: search(query), query: query)}
+
+  def handle_event("change", %{"_target" => ["check", id], "check" => boxes}, socket) do
+    on = boxes[id] == "on"
+    Logger.debug("Checked item #{id} to #{on}")
+    {:noreply, assign(socket, items: items())}
   end
 
-  @impl true
-  def handle_event("search", %{"q" => query}, socket) do
-    case search(query) do
-      %{^query => vsn} ->
-        {:noreply, redirect(socket, external: "https://hexdocs.pm/#{query}/#{vsn}")}
-
-      _ ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "No dependencies found matching \"#{query}\"")
-         |> assign(results: %{}, query: query)}
-    end
+  def handle_event("change", %{"_target" => ["check", id]}, socket) do
+    on = false
+    Logger.debug("Checked item #{id} to #{on}")
+    {:noreply, assign(socket, items: items())}
   end
 
-  defp search(query) do
-    if not ShoppingListWeb.Endpoint.config(:code_reloader) do
-      raise "action disabled when not in development"
-    end
+  def handle_event("change", whatever, socket) do
+    Logger.debug("whatever is #{inspect(whatever)}")
+    {:noreply, assign(socket, items: items())}
+  end
 
-    for {app, desc, vsn} <- Application.started_applications(),
-        app = to_string(app),
-        String.starts_with?(app, query) and not List.starts_with?(desc, ~c"ERTS"),
-        into: %{},
-        do: {app, vsn}
+  def handle_event("add", whatever, socket) do
+    Logger.debug("add #{inspect(whatever)}")
+    {:noreply, assign(socket, items: items())}
+  end
+
+  defp items() do
+    [{1, "tomatis"}, {2, "potatisk"}, {3, "kaosalis"}]
   end
 end
