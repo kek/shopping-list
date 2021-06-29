@@ -5,7 +5,14 @@ defmodule ShoppingListWeb.PageLive do
 
   @impl true
   def mount(_params, _session, socket) do
+    if connected?(socket), do: Process.send_after(self(), :update, 1000)
     {:ok, assign(socket, items: ItemList.all())}
+  end
+
+  @impl true
+  def handle_info(:update, socket) do
+    Process.send_after(self(), :update, 1000)
+    {:noreply, assign(socket, items: ItemList.all())}
   end
 
   @impl true
@@ -25,7 +32,7 @@ defmodule ShoppingListWeb.PageLive do
   end
 
   def handle_event("change", whatever, socket) do
-    Logger.debug("unknown change event is #{inspect(whatever)}")
+    Logger.debug("ignoring change event #{inspect(whatever)}")
     {:noreply, assign(socket, items: ItemList.all())}
   end
 
