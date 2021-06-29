@@ -5,7 +5,6 @@ defmodule ShoppingListWeb.PageLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    ItemList.load()
     {:ok, assign(socket, items: ItemList.all())}
   end
 

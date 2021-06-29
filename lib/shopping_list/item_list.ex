@@ -7,10 +7,8 @@ defmodule ShoppingList.ItemList do
   end
 
   def init([]) do
-    {:ok, []}
+    {:ok, load_items()}
   end
-
-  def load, do: GenServer.call(__MODULE__, {:load})
 
   def each(fun), do: GenServer.call(__MODULE__, {:each, fun})
 
@@ -21,15 +19,6 @@ defmodule ShoppingList.ItemList do
   def add(name), do: GenServer.call(__MODULE__, {:add, name})
 
   def all(), do: GenServer.call(__MODULE__, {:all})
-
-  def handle_call({:load}, _from, _state) do
-    {:reply, :ok,
-     [
-       Item.new("tomatillo"),
-       Item.new("spagati"),
-       Item.new("fantasini")
-     ]}
-  end
 
   def handle_call({:each, fun}, _from, state) do
     {:reply, Enum.map(state, fun), state}
@@ -49,5 +38,13 @@ defmodule ShoppingList.ItemList do
 
   def handle_call({:all}, _from, state) do
     {:reply, state, state}
+  end
+
+  defp load_items do
+    [
+      Item.new("tomatillo"),
+      Item.new("spagati"),
+      Item.new("fantasini")
+    ]
   end
 end
