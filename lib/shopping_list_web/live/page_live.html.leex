@@ -1,8 +1,8 @@
 <form phx-change="change" phx-submit="add">
   <ul>
-    <%= for {id, name} <- @items do %>
-      <li style="list-style-type: none">  <input type="checkbox" name="check[<%= id %>]">
-        <%= name %>
+    <%= for item <- @items do %>
+      <li style="list-style-type: none">  <input type="checkbox" name="check[<%= item.id %>]">
+        <%= item.name %> (<%= item.id %>)
       </li>
     <% end %>
   </ul>

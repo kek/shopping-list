@@ -1,37 +1,38 @@
 defmodule ShoppingListWeb.PageLive do
   use ShoppingListWeb, :live_view
+  alias ShoppingList.ItemList
   require Logger
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, items: items())}
+    ItemList.load()
+    {:ok, assign(socket, items: ItemList.all())}
   end
 
   @impl true
-
   def handle_event("change", %{"_target" => ["check", id], "check" => boxes}, socket) do
-    on = boxes[id] == "on"
-    Logger.debug("Checked item #{id} to #{on}")
-    {:noreply, assign(socket, items: items())}
+    if boxes[id] == "on" do
+      ItemList.check(id)
+    else
+      ItemList.uncheck(id)
+    end
+
+    {:noreply, assign(socket, items: ItemList.all())}
   end
 
   def handle_event("change", %{"_target" => ["check", id]}, socket) do
-    on = false
-    Logger.debug("Checked item #{id} to #{on}")
-    {:noreply, assign(socket, items: items())}
+    ItemList.uncheck(id)
+    {:noreply, assign(socket, items: ItemList.all())}
   end
 
   def handle_event("change", whatever, socket) do
-    Logger.debug("whatever is #{inspect(whatever)}")
-    {:noreply, assign(socket, items: items())}
+    Logger.debug("unknown change event is #{inspect(whatever)}")
+    {:noreply, assign(socket, items: ItemList.all())}
   end
 
-  def handle_event("add", whatever, socket) do
-    Logger.debug("add #{inspect(whatever)}")
-    {:noreply, assign(socket, items: items())}
-  end
-
-  defp items() do
-    [{1, "tomatis"}, {2, "potatisk"}, {3, "kaosalis"}]
+  def handle_event("add", %{"new" => name}, socket) do
+    Logger.debug("add #{name}")
+    ItemList.add(name)
+    {:noreply, assign(socket, items: ItemList.all())}
   end
 end

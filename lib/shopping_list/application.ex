@@ -12,9 +12,10 @@ defmodule ShoppingList.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: ShoppingList.PubSub},
       # Start the Endpoint (http/https)
-      ShoppingListWeb.Endpoint
+      ShoppingListWeb.Endpoint,
       # Start a worker by calling: ShoppingList.Worker.start_link(arg)
       # {ShoppingList.Worker, arg}
+      ShoppingList.ItemList
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
