@@ -1,7 +1,7 @@
 <form phx-submit="add" phx-change="change" >
   <ul>
     <%= for item <- @items do %>
-      <li style="list-style-type: none">
+      <li style="list-style-type: none; padding: 0px; margin: 0px;">
         <input type="checkbox" name="check[<%= item.id %>]"
                <%= if item.checked, do: "checked" %>>
         <%= item.name %>
@@ -10,7 +10,7 @@
                phx-value-smurf="gurka"
                phx-click="remove"
                value="🗑️"
-               style="border: none; background: none;"></input>
+               style="border: none; background: none; padding: 0px; margin: 0px;"></input>
       </li>
     <% end %>
   </ul>
