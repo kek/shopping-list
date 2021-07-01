@@ -18,8 +18,10 @@ defmodule ShoppingListWeb.PageLive do
   @impl true
   def handle_event("change", %{"_target" => ["check", id], "check" => boxes}, socket) do
     if boxes[id] == "on" do
+      Logger.debug("check #{inspect(id)}")
       ItemList.check(id)
     else
+      Logger.debug("uncheck #{inspect(id)}")
       ItemList.uncheck(id)
     end
 
@@ -27,6 +29,7 @@ defmodule ShoppingListWeb.PageLive do
   end
 
   def handle_event("change", %{"_target" => ["check", id]}, socket) do
+    Logger.debug("uncheck #{inspect(id)}")
     ItemList.uncheck(id)
     {:noreply, assign(socket, items: ItemList.all())}
   end
@@ -36,9 +39,20 @@ defmodule ShoppingListWeb.PageLive do
     {:noreply, assign(socket, items: ItemList.all())}
   end
 
-  def handle_event("add", %{"new" => name}, socket) do
-    Logger.debug("add #{name}")
+  def handle_event("add", %{"new" => ""}, socket) do
+    Logger.debug("Empty new event")
+    {:noreply, assign(socket, items: ItemList.all())}
+  end
+
+  def handle_event("add", %{"new" => name} = event, socket) do
+    Logger.debug("Adding #{name}. #{inspect(event)}")
     ItemList.add(name)
+    {:noreply, assign(socket, items: ItemList.all())}
+  end
+
+  def handle_event("remove", %{"item-id" => id} = event, socket) do
+    Logger.debug("Removing #{id}. #{inspect(event)}")
+    ItemList.remove(id)
     {:noreply, assign(socket, items: ItemList.all())}
   end
 end

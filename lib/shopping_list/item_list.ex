@@ -18,6 +18,8 @@ defmodule ShoppingList.ItemList do
 
   def add(name), do: GenServer.call(__MODULE__, {:add, name})
 
+  def remove(id), do: GenServer.call(__MODULE__, {:remove, id})
+
   def all(), do: GenServer.call(__MODULE__, {:all})
 
   def handle_call({:each, fun}, _from, state) do
@@ -28,11 +30,45 @@ defmodule ShoppingList.ItemList do
     {:reply, :ok, state ++ [Item.new(name)]}
   end
 
-  def handle_call({:check, _id}, _from, state) do
+  def handle_call({:remove, id}, _from, state) do
+    state =
+      state
+      |> Enum.flat_map(fn item ->
+        if item.id == id do
+          []
+        else
+          [item]
+        end
+      end)
+
     {:reply, :ok, state}
   end
 
-  def handle_call({:uncheck, _id}, _from, state) do
+  def handle_call({:check, id}, _from, state) do
+    state =
+      state
+      |> Enum.map(fn item ->
+        if item.id == id do
+          %{item | checked: true}
+        else
+          item
+        end
+      end)
+
+    {:reply, :ok, state}
+  end
+
+  def handle_call({:uncheck, id}, _from, state) do
+    state =
+      state
+      |> Enum.map(fn item ->
+        if item.id == id do
+          %{item | checked: false}
+        else
+          item
+        end
+      end)
+
     {:reply, :ok, state}
   end
 

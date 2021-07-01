@@ -1,8 +1,16 @@
-<form phx-change="change" phx-submit="add">
+<form phx-submit="add" phx-change="change" >
   <ul>
     <%= for item <- @items do %>
-      <li style="list-style-type: none">  <input type="checkbox" name="check[<%= item.id %>]">
-        <%= item.name %> (<%= item.id %>)
+      <li style="list-style-type: none">
+        <input type="checkbox" name="check[<%= item.id %>]"
+               <%= if item.checked, do: "checked" %>>
+        <%= item.name %>
+        <input type="button"
+               phx-value-item-id="<%= item.id %>"
+               phx-value-smurf="gurka"
+               phx-click="remove"
+               value="🗑️"
+               style="border: none; background: none;"></input>
       </li>
     <% end %>
   </ul>
