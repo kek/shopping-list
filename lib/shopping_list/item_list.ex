@@ -1,13 +1,20 @@
 defmodule ShoppingList.ItemList do
   use GenServer
   alias ShoppingList.Item
+  require Logger
 
   def start_link([]) do
     GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
   def init([]) do
+    Process.flag(:trap_exit, true)
     {:ok, load_items()}
+  end
+
+  def terminate(reason, state) do
+    Logger.debug("Terminating for #{inspect(reason)} with #{inspect(state)}")
+    save_items(state)
   end
 
   def each(fun), do: GenServer.call(__MODULE__, {:each, fun})
@@ -77,10 +84,28 @@ defmodule ShoppingList.ItemList do
   end
 
   defp load_items do
-    [
-      Item.new("tomatillo"),
-      Item.new("spagati"),
-      Item.new("fantasini")
-    ]
+    case File.open("/tmp/shopping-list.json", [:read]) do
+      {:ok, file} ->
+        Logger.debug("Reading items")
+
+        json = IO.read(file, :all)
+        {:ok, data} = Jason.decode(json)
+
+        Enum.map(data, fn %{"id" => id, "name" => name, "checked" => checked} ->
+          %Item{id: id, name: name, checked: checked}
+        end)
+        |> IO.inspect(label: "items")
+
+      {:error, :enoent} ->
+        Logger.debug("Populating default items")
+        []
+    end
+  end
+
+  defp save_items(state) do
+    {:ok, file} = File.open("/tmp/shopping-list.json", [:write])
+    {:ok, json} = Jason.encode(state)
+    :ok = IO.write(file, json)
+    :ok = File.close(file)
   end
 end

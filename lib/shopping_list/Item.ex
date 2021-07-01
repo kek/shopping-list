@@ -1,4 +1,5 @@
 defmodule ShoppingList.Item do
+  @derive Jason.Encoder
   defstruct [:id, :name, :checked]
 
   def new(name) do
