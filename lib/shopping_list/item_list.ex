@@ -92,7 +92,7 @@ defmodule ShoppingList.ItemList do
   end
 
   defp load_items do
-    case File.open("/tmp/shopping-list.json", [:read]) do
+    case File.open(storage_file(), [:read]) do
       {:ok, file} ->
         Logger.debug("Reading items")
 
@@ -111,9 +111,13 @@ defmodule ShoppingList.ItemList do
   end
 
   defp save_items(state) do
-    {:ok, file} = File.open("/tmp/shopping-list.json", [:write])
+    {:ok, file} = File.open(storage_file(), [:write])
     {:ok, json} = Jason.encode(state)
     :ok = IO.write(file, json)
     :ok = File.close(file)
+  end
+
+  defp storage_file() do
+    Application.get_env(:shopping_list, :storage)
   end
 end

@@ -26,3 +26,6 @@ config :shopping_list, ShoppingListWeb.Endpoint,
   ],
   secret_key_base: secret_key_base,
   server: true
+
+config :shopping_list,
+  storage: System.get_env("STORAGE", "/tmp/shopping-list.json")
