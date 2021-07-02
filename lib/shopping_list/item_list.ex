@@ -9,6 +9,7 @@ defmodule ShoppingList.ItemList do
 
   def init([]) do
     Process.flag(:trap_exit, true)
+    Process.send_after(self(), {:save}, 5000)
     {:ok, load_items()}
   end
 
@@ -28,6 +29,13 @@ defmodule ShoppingList.ItemList do
   def remove(id), do: GenServer.call(__MODULE__, {:remove, id})
 
   def all(), do: GenServer.call(__MODULE__, {:all})
+
+  def handle_info({:save}, state) do
+    Logger.debug("Saving")
+    save_items(state)
+    Process.send_after(self(), {:save}, 5000)
+    {:noreply, state}
+  end
 
   def handle_call({:each, fun}, _from, state) do
     {:reply, Enum.map(state, fun), state}
