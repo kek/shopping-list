@@ -18,17 +18,17 @@ defmodule ShoppingList.ItemList do
     save_items(state)
   end
 
-  def each(fun), do: GenServer.call(__MODULE__, {:each, fun})
+  def each(list_name, fun), do: GenServer.call(__MODULE__, {:each, list_name, fun})
 
-  def check(id), do: GenServer.call(__MODULE__, {:check, id})
+  def check(list_name, id), do: GenServer.call(__MODULE__, {:check, list_name, id})
 
-  def uncheck(id), do: GenServer.call(__MODULE__, {:uncheck, id})
+  def uncheck(list_name, id), do: GenServer.call(__MODULE__, {:uncheck, list_name, id})
 
-  def add(name), do: GenServer.call(__MODULE__, {:add, name})
+  def add(list_name, name), do: GenServer.call(__MODULE__, {:add, list_name, name})
 
-  def remove(id), do: GenServer.call(__MODULE__, {:remove, id})
+  def remove(list_name, id), do: GenServer.call(__MODULE__, {:remove, list_name, id})
 
-  def all(), do: GenServer.call(__MODULE__, {:all})
+  def all(list_name), do: GenServer.call(__MODULE__, {:all, list_name})
 
   def handle_info({:save}, state) do
     Logger.debug("Saving")
@@ -37,17 +37,24 @@ defmodule ShoppingList.ItemList do
     {:noreply, state}
   end
 
-  def handle_call({:each, fun}, _from, state) do
-    {:reply, Enum.map(state, fun), state}
+  def handle_call({:each, list_name, fun}, _from, state) do
+    list =
+      Map.get(state, list_name)
+      |> Enum.map(fun)
+
+    {:reply, Map.put(state, list_name, list), state}
   end
 
-  def handle_call({:add, name}, _from, state) do
-    {:reply, :ok, state ++ [Item.new(name)]}
+  def handle_call({:add, list_name, name}, _from, state) do
+    list = Map.get(state, list_name, []) ++ [Item.new(name)]
+
+    {:reply, :ok, Map.put(state, list_name, list)}
   end
 
-  def handle_call({:remove, id}, _from, state) do
-    state =
+  def handle_call({:remove, list_name, id}, _from, state) do
+    list =
       state
+      |> Map.get(list_name)
       |> Enum.flat_map(fn item ->
         if item.id == id do
           []
@@ -56,12 +63,13 @@ defmodule ShoppingList.ItemList do
         end
       end)
 
-    {:reply, :ok, state}
+    {:reply, :ok, Map.put(state, list_name, list)}
   end
 
-  def handle_call({:check, id}, _from, state) do
-    state =
+  def handle_call({:check, list_name, id}, _from, state) do
+    list =
       state
+      |> Map.get(list_name)
       |> Enum.map(fn item ->
         if item.id == id do
           %{item | checked: true}
@@ -70,12 +78,13 @@ defmodule ShoppingList.ItemList do
         end
       end)
 
-    {:reply, :ok, state}
+    {:reply, :ok, Map.put(state, list_name, list)}
   end
 
-  def handle_call({:uncheck, id}, _from, state) do
-    state =
+  def handle_call({:uncheck, list_name, id}, _from, state) do
+    list =
       state
+      |> Map.get(list_name)
       |> Enum.map(fn item ->
         if item.id == id do
           %{item | checked: false}
@@ -84,11 +93,11 @@ defmodule ShoppingList.ItemList do
         end
       end)
 
-    {:reply, :ok, state}
+    {:reply, :ok, Map.put(state, list_name, list)}
   end
 
-  def handle_call({:all}, _from, state) do
-    {:reply, state, state}
+  def handle_call({:all, list_name}, _from, state) do
+    {:reply, Map.get(state, list_name, []), state}
   end
 
   defp load_items do
@@ -99,14 +108,19 @@ defmodule ShoppingList.ItemList do
         json = IO.read(file, :all)
         {:ok, data} = Jason.decode(json)
 
-        Enum.map(data, fn %{"id" => id, "name" => name, "checked" => checked} ->
-          %Item{id: id, name: name, checked: checked}
+        Enum.map(data, fn {list_name, list} ->
+          list =
+            Enum.map(list, fn %{"id" => id, "name" => name, "checked" => checked} ->
+              %Item{id: id, name: name, checked: checked}
+            end)
+
+          {list_name, list}
         end)
-        |> IO.inspect(label: "items")
+        |> Map.new()
 
       {:error, :enoent} ->
         Logger.debug("Populating default items")
-        []
+        %{}
     end
   end
 
