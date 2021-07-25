@@ -30,6 +30,8 @@ defmodule ShoppingList.ItemList do
 
   def all(list_name), do: GenServer.call(__MODULE__, {:all, list_name})
 
+  def list_of_lists(), do: GenServer.call(__MODULE__, {:list_of_lists})
+
   def handle_info({:save}, state) do
     Logger.debug("Saving")
     save_items(state)
@@ -98,6 +100,10 @@ defmodule ShoppingList.ItemList do
 
   def handle_call({:all, list_name}, _from, state) do
     {:reply, Map.get(state, list_name, []), state}
+  end
+
+  def handle_call({:list_of_lists}, _from, state) do
+    {:reply, Map.keys(state), state}
   end
 
   defp load_items do

@@ -7,7 +7,13 @@ defmodule ShoppingListWeb.PageLive do
   def mount(%{"list" => list_name}, _session, socket) do
     Logger.debug(list_name)
     if connected?(socket), do: Process.send_after(self(), :update, 1000)
-    {:ok, assign(socket, items: ItemList.all(list_name), list_name: list_name)}
+
+    {:ok,
+     assign(socket,
+       items: ItemList.all(list_name),
+       list_name: list_name,
+       lists: ItemList.list_of_lists()
+     )}
   end
 
   def mount(params, session, socket) do

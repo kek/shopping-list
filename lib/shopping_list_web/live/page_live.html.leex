@@ -1,5 +1,11 @@
 <h1><%= @list_name %></h1>
 
+<%= for list <- @lists do %>
+    <%= unless list == @list_name do %>
+        <%= link list, to: Routes.page_path(ShoppingListWeb.Endpoint, :index, list) %>
+    <% end %>
+<% end %>
+
 <form phx-submit="add" phx-change="change" >
   <ul>
     <%= for item <- @items do %>
