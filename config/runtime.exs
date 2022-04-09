@@ -11,17 +11,20 @@ secret_key_base =
     "6z/v1/06XBINk4kghypkpB+J1awjsJmWhuiJMey0JOdjXbLc3gNWscgez8PV3V+Q"
   end
 
-url =
+host =
   if config_env() == :prod do
-    [host: System.fetch_env!("WEB_HOST"), port: 443]
+    System.fetch_env!("WEB_HOST")
   else
-    [host: "localhost"]
+    "localhost"
   end
 
+port = String.to_integer(System.get_env("PORT") || "4000")
+
 config :shopping_list, ShoppingListWeb.Endpoint,
-  url: url,
+  url: [host: host, port: port],
   http: [
-    port: String.to_integer(System.get_env("PORT") || "4000"),
+    ip: {0, 0, 0, 0, 0, 0, 0, 0},
+    port: port,
     transport_options: [socket_opts: [:inet6]]
   ],
   secret_key_base: secret_key_base,
