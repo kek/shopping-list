@@ -5,7 +5,7 @@ defmodule ShoppingListWeb.PageLive do
 
   @impl true
   def mount(%{"list" => list_name}, _session, socket) do
-    Logger.debug(list_name)
+    Logger.debug("Mount #{list_name}")
     if connected?(socket), do: Process.send_after(self(), :update, 1000)
 
     {:ok,

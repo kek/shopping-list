@@ -33,7 +33,6 @@ defmodule ShoppingList.ItemList do
   def list_of_lists(), do: GenServer.call(__MODULE__, {:list_of_lists})
 
   def handle_info({:save}, state) do
-    Logger.debug("Saving")
     save_items(state)
     Process.send_after(self(), {:save}, 5000)
     {:noreply, state}
