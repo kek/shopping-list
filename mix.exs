@@ -45,9 +45,9 @@ defmodule ShoppingList.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
-      # {:remixed_remix, "~> 2.0", only: :dev},
-      # {:mix_test_watch, "~> 1.0", only: :dev, runtime: false}
+      {:plug_cowboy, "~> 2.5"},
+      {:remixed_remix, "~> 2.0", only: :dev},
+      {:mix_test_watch, "~> 1.1", only: :dev, runtime: false}
     ]
   end
 
